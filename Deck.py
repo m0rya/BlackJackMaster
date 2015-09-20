@@ -1,0 +1,102 @@
+class Deck(object):
+	def __init__(self):
+		self.cards = [[1 for i in range(13)] for j in range(4)]
+
+	def deleteCard(self, mark, num):
+		self.cards[mark][num] = 0
+
+	def reset(self):
+		self.cards = [[1 for i in range(13)] for j in range(4)]
+
+	def showCardStatus(self):
+		for i in range(len(self.cards)):
+			for j in range(len(self.cards[i])):
+				print self.cards[i][j],
+
+			print
+
+	def countRemaining(self):
+		count = 0
+		for i in range(len(self.cards)):
+			for j in range(len(self.cards[i])):
+				if self.cards[i][j] == 1:
+					count += 1		
+		return count
+	
+	def countSpecificNum(self, num):
+		
+		count = 0
+		if num != 10:
+			for i in range(len(self.cards)):
+				if self.cards[i][num-1] == 1:
+					count += 1
+		elif num == 10:
+			for i in range(len(self.cards)):
+				for j in range(9,13):
+					if self.cards[i][j] == 1:
+						count += 1
+						
+		return count
+
+
+class Decks(object):
+	def __init__(self, deckNum):
+		self.deckNum = deckNum 
+
+		self.decks = [Deck() for i in range(deckNum)]
+
+	def showDecksCardStatus(self):
+		for i in range(self.deckNum):
+			self.decks[i].showCardStatus()
+
+			print "======================"
+
+
+	def deleteCard(self, mark, num):
+		for i in range(len(self.decks)):
+			if self.decks[i].cards[mark][num] == 1:
+				self.decks[i].deleteCard(mark, num)
+				return
+
+		else:
+			print "Error: over flow card"
+
+	def countAllCard(self):
+		count = 0
+		for i in range(self.deckNum):
+			count += self.decks[i].countRemaining()
+
+		return count
+
+
+
+	def countSpecificNum(self, num):
+		count = 0
+		for i in range(self.deckNum):
+			count += self.decks[i].countSpecificNum(num)
+
+		return count
+
+		
+
+
+
+#=======Test=========
+if False:
+
+	import random
+	decks = Decks(2)
+	print decks.countAllCard()
+	print decks.countSpecificCard(1)
+
+
+	for i in range(20):
+		randMark = random.randint(0,3)
+		randNum  = random.randint(0,12)
+
+		decks.deleteCard(randMark, randNum)
+	
+	print decks.countAllCard()
+	print decks.countSpecificCard(1)
+
+	decks.showDecksCardStatus()
