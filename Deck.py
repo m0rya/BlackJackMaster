@@ -3,7 +3,7 @@ class Deck(object):
 		self.cards = [[1 for i in range(13)] for j in range(4)]
 
 	def deleteCard(self, mark, num):
-		self.cards[mark][num] = 0
+		self.cards[mark][num-1] = 0
 
 	def reset(self):
 		self.cards = [[1 for i in range(13)] for j in range(4)]
@@ -54,7 +54,7 @@ class Decks(object):
 
 	def deleteCard(self, mark, num):
 		for i in range(len(self.decks)):
-			if self.decks[i].cards[mark][num] == 1:
+			if self.decks[i].cards[mark][num-1] == 1:
 				self.decks[i].deleteCard(mark, num)
 				return
 
@@ -77,6 +77,21 @@ class Decks(object):
 
 		return count
 
+	def getAllRemaining(self):
+		result=[]
+
+		for i in range(1,14):
+			tmpCount = self.countSpecificNum(i)
+			if i == 10:
+				tmp = 0
+				for m in range(self.deckNum):
+					for n in range(11,14):
+						tmp += self.decks[m].countSpecificNum(n)
+
+				tmpCount -= tmp
+			result.append(tmpCount)
+
+		return result
 		
 
 
