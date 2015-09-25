@@ -1,4 +1,3 @@
-
 class Odds(object):
 
 	def __init__(self,decks,  player, dealer):
@@ -11,37 +10,40 @@ class Odds(object):
 	
 		#if dont have 'A'
 		if score[0] == score[1]:
-			if score[0]  <= 11 or score[0] == 21:
-				return 0
+			if score[0] == 21:
+				return [0,0,0]
 
 			else:
 				borderLine = 21-score[0]
+				allCards = self.decks.countAllCard()
+
+				#burst Prob
 				way = 0
 				for i in range(borderLine+1,11):
 					way += self.decks.countSpecificNum(i)
+				
+				burstProb = round(float(way)/allCards*100.0, 2)
 
-				allCards = self.decks.countAllCard()
-				
-				#print way
-				#print allCards
-				burst =  float(way)/allCards*100.0
-				burst = round(burst,2)
-				
-				#17~21
-				probability = []
+				#17~21 Prob
+				way = 0
 				for i in range(5):
-					if score[0] < 17+i:
-						tmp = 17+i-score[0]
-						way = self.decks.countSpecificNum(tmp)
-						tmpResult = float(way)/allCards*100
-						probability[0] += (round(tmpResult,2))
-
-					else:
-						probability[0] += 0
-				probability.append(100-probability[0]-burst)
-				probability.append(burst)
+					tmpBorder = 17+i - score[0]
+					if 0 < tmpBorder  < 12:
+						if tmpBorder==11:
+							way += self.decks.countSpecificNum(1)
+						else:
+							way += self.decks.countSpecificNum(tmpBorder)
+				Prob17_21 = round(float(way)/allCards*100.0, 2)
+				if score[0] >= 16:
+					Prob_under17 = 0
+				else:
+					Prob_under17 = 100-burstProb-Prob17_21
 				
-				return probability
+
+				return [Prob17_21, Prob_under17, burstProb]
+
+				
+
 
 	
 	def calcDealerHand(self):
@@ -100,6 +102,10 @@ class Odds(object):
 			
 			
 #=======Test======
+import Deck
+import Player
+import random
+
 if False:
 	player = Player.Player()
 	dealer = Player.Player()

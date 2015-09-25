@@ -5,7 +5,7 @@ class Deck(object):
 	def deleteCard(self, mark, num):
 		self.cards[mark][num-1] = 0
 
-	def reset(self):
+	def resetDeck(self):
 		self.cards = [[1 for i in range(13)] for j in range(4)]
 
 	def showCardStatus(self):
@@ -92,6 +92,9 @@ class Decks(object):
 			result.append(tmpCount)
 
 		return result
+	def resetDecks(self):
+		for i in range(self.deckNum):
+			self.decks[i].resetDeck()
 		
 
 
