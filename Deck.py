@@ -72,6 +72,9 @@ class Decks(object):
 
 	def countSpecificNum(self, num):
 		count = 0
+		if num == 11:
+			num = 1
+
 		for i in range(self.deckNum):
 			count += self.decks[i].countSpecificNum(num)
 

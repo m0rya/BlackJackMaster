@@ -12,7 +12,9 @@ class MainFrame(wx.Frame):
 
 		self.ProbabilityName = [0,0,0,0]
 		self.PlayerProbability = [0,0,0,0]
-		self.DealerProbability = []
+
+		self.DealerProbName = [0,0,0,0,0,0,0]
+		self.DealerProb = [0,0,0,0,0,0,0]
 
 		self.leftPanel = wx.Panel(self,  pos = (0,0), size=(450,800))
 		self.InitUI()
@@ -59,12 +61,15 @@ class MainFrame(wx.Frame):
 		self.SetRemainingData()
 		#reload probability 
 		self.SetProbability()
+		self.SetDealerProbability()
 	
 		print '#done delete'
 
 	def resetHand(self, event):
 		self.player.resetHandCard()
+		self.dealer.resetHandCard()
 		self.SetProbability()
+		self.SetDealerProbability()
 
 	def resetDecks(self, event):
 		self.decks.resetDecks()
@@ -80,31 +85,34 @@ class MainFrame(wx.Frame):
 
 		self.deleteCards(None)
 		self.SetProbability()
+		self.SetDealerProbability()
 		print '#done setPlayerHand'
 
 	def SetProbability(self):
 		tmpProbability = self.odds.calcBurstPlayer()
 		#print '#78# calcBusrtPlayer %s' %(tmpProbability)
+		ProbTextHeight=[20,15]
 		
 		tmpPos =[]
 		tmpSize=[]
-		tmpPos.append([10,290])
-		tmpPos.append([10+tmpProbability[2]*4,290])
-		tmpPos.append([tmpPos[1][0],tmpPos[1][1]+20*2])
-		tmpPos.append([10+(tmpProbability[2]+tmpProbability[1])*4, 290+20*2])
+		tmpPos.append([10,240])
+		tmpPos.append([10+tmpProbability[2]*4,240])
+		tmpPos.append([tmpPos[1][0],tmpPos[1][1]+sum(ProbTextHeight)])
+		tmpPos.append([10+(tmpProbability[2]+tmpProbability[1])*4, tmpPos[1][1]+sum(ProbTextHeight)])
 
-		tmpSize.append([tmpProbability[2]*4, 20])
-		tmpSize.append([(100-tmpProbability[2])*4, 20])
-		tmpSize.append([tmpProbability[1]*4, 20])
-		tmpSize.append([tmpProbability[0]*4,20])
+		tmpSize.append([tmpProbability[2]*4, ProbTextHeight[0]])
+		tmpSize.append([(100-tmpProbability[2])*4, ProbTextHeight[0]])
+		tmpSize.append([tmpProbability[1]*4, ProbTextHeight[0]])
+		tmpSize.append([tmpProbability[0]*4,ProbTextHeight[0]])
 		#print '#91# PlayerProbability Num %s'%(len(self.PlayerProbability))
 		#print '#92# self.PlayerProbability '
 		#print self.PlayerProbability
 
 		##hide PreStaticText
-		for i in range(4):
-			self.ProbabilityName[i].Hide()
-			self.PlayerProbability[i].Hide()
+		if self.ProbabilityName[0] != 0:
+			for i in range(4):
+				self.ProbabilityName[i].Hide()
+				self.PlayerProbability[i].Hide()
 
 		self.ProbabilityName[0] = wx.StaticText(self.leftPanel, wx.ID_ANY, 'Burst', style=wx.TE_CENTER, pos=(tmpPos[0][0],tmpPos[0][1]),size=(tmpSize[0][0],tmpSize[0][1]))
 		self.ProbabilityName[1] = wx.StaticText(self.leftPanel, wx.ID_ANY, 'Safe', style=wx.TE_CENTER, pos=(tmpPos[1][0],tmpPos[1][1]), size=(tmpSize[1][0],tmpSize[1][1]))
@@ -112,10 +120,10 @@ class MainFrame(wx.Frame):
 		self.ProbabilityName[3] = wx.StaticText(self.leftPanel, wx.ID_ANY, '17~21', style=wx.TE_CENTER, pos=(tmpPos[3][0],tmpPos[3][1]), size=(tmpSize[3][0], tmpSize[3][1]))
 
 
-		self.PlayerProbability[0] = wx.StaticText(self.leftPanel,wx.ID_ANY, str(tmpProbability[2]), style=wx.TE_CENTER, pos=(tmpPos[0][0],tmpPos[0][1]+20),size=(tmpSize[0][0],tmpSize[0][1]))
-		self.PlayerProbability[1] = wx.StaticText(self.leftPanel,wx.ID_ANY, str(100-tmpProbability[2]), style=wx.TE_CENTER, pos=(tmpPos[1][0],tmpPos[1][1]+20),size=(tmpSize[1][0],tmpSize[1][1]))
-		self.PlayerProbability[2] = wx.StaticText(self.leftPanel,wx.ID_ANY, str(tmpProbability[1]), style=wx.TE_CENTER, pos=(tmpPos[2][0],tmpPos[2][1]+20),size=(tmpSize[2][0],tmpSize[2][1]))
-		self.PlayerProbability[3] = wx.StaticText(self.leftPanel,wx.ID_ANY, str(tmpProbability[0]), style=wx.TE_CENTER, pos=(tmpPos[3][0],tmpPos[3][1]+20),size=(tmpSize[3][0],tmpSize[3][1]))
+		self.PlayerProbability[0] = wx.StaticText(self.leftPanel,wx.ID_ANY, str(tmpProbability[2]), style=wx.TE_CENTER, pos=(tmpPos[0][0],tmpPos[0][1]+ProbTextHeight[0]),size=(tmpSize[0][0],ProbTextHeight[1]))
+		self.PlayerProbability[1] = wx.StaticText(self.leftPanel,wx.ID_ANY, str(100-tmpProbability[2]), style=wx.TE_CENTER, pos=(tmpPos[1][0],tmpPos[1][1]+ProbTextHeight[0]),size=(tmpSize[1][0],ProbTextHeight[1]))
+		self.PlayerProbability[2] = wx.StaticText(self.leftPanel,wx.ID_ANY, str(tmpProbability[1]), style=wx.TE_CENTER, pos=(tmpPos[2][0],tmpPos[2][1]+ProbTextHeight[0]),size=(tmpSize[2][0],ProbTextHeight[1]))
+		self.PlayerProbability[3] = wx.StaticText(self.leftPanel,wx.ID_ANY, str(tmpProbability[0]), style=wx.TE_CENTER, pos=(tmpPos[3][0],tmpPos[3][1]+ProbTextHeight[0]),size=(tmpSize[3][0],ProbTextHeight[1]))
 
 		
 		self.ProbabilityName[0].SetForegroundColour("#FFFFFF")
@@ -138,12 +146,107 @@ class MainFrame(wx.Frame):
 	
 
 
+	##===Dealer Probability====
+
+	def SetDealerHand(self,event):
+		buttonStatus = self.getAllTButtonStatus()
+
+		for i in range(len(buttonStatus)):
+			for j in range(len(buttonStatus[i])):
+				if buttonStatus[i][j]:
+					self.dealer.getCard(i,j+1)
+
+		self.deleteCards(None)
+		print '#done setDealerHand'
+
+	
+	def SetDealerProbability(self):
+		#tmpProb = [17, 18, 19, 20, 21, Burst]
+		tmpProb= self.odds.CalcDealerProb()
+		for i in range(len(tmpProb)):
+			tmpProb[i] = round(tmpProb[i],3)
+		print tmpProb
+		ProbTextHeight=[20,15]
+		
+		tmpPos =[]
+		tmpSize=[]
+		
+		#set staticText Pos and Size
+		tmpPos.append([10,350])
+		tmpPos.append([10+tmpProb[5]*4,350])
+		tmpPos.append([tmpPos[1][0],tmpPos[1][1]+sum(ProbTextHeight)])
+		for i in range(4):
+			tmpPos.append([tmpPos[i+2][0]+tmpProb[i]*4, tmpPos[2][1]])
+
+		tmpSize.append([tmpProb[5]*4, ProbTextHeight[0]])
+		tmpSize.append([(100-tmpProb[5])*4, ProbTextHeight[0]])
+		for i in range(5):
+			tmpSize.append([tmpProb[i]*4, ProbTextHeight[1]])
+
+		
+		##hide PreStaticText
+		if self.DealerProbName[0] != 0:
+			for i in range(7):
+				self.DealerProbName[i].Hide()
+				self.DealerProb[i].Hide()
+
+		self.DealerProbName[0] = wx.StaticText(self.leftPanel, wx.ID_ANY, 'Burst', style=wx.TE_CENTER, pos=(tmpPos[0][0],tmpPos[0][1]),size=(tmpSize[0][0],tmpSize[0][1]))
+		self.DealerProbName[1] = wx.StaticText(self.leftPanel, wx.ID_ANY, 'Safe', style=wx.TE_CENTER, pos=(tmpPos[1][0],tmpPos[1][1]), size=(tmpSize[1][0],tmpSize[1][1]))
+
+		for i in range(5):
+			self.DealerProbName[i+2] = wx.StaticText(self.leftPanel, wx.ID_ANY, str(17+i), style=wx.TE_CENTER, pos=(tmpPos[i+2][0], tmpPos[i+2][1]), size=(tmpSize[i+2][0], tmpSize[i+2][1]))
+			
+
+		self.DealerProb[0] = wx.StaticText(self.leftPanel,wx.ID_ANY, str(tmpProb[5]), style=wx.TE_CENTER, pos=(tmpPos[0][0],tmpPos[0][1]+ProbTextHeight[0]),size=(tmpSize[0][0],ProbTextHeight[1]))
+		self.DealerProb[1] = wx.StaticText(self.leftPanel,wx.ID_ANY, str(100-tmpProb[5]), style=wx.TE_CENTER, pos=(tmpPos[1][0],tmpPos[1][1]+ProbTextHeight[0]),size=(tmpSize[1][0],ProbTextHeight[1]))
+
+		for i in range(5):
+			self.DealerProb[2+i] = wx.StaticText(self.leftPanel, wx.ID_ANY, str(tmpProb[0+i]), style=wx.TE_CENTER, pos=(tmpPos[2+i][0],tmpPos[2+1][1]+ProbTextHeight[1]),size=(tmpSize[2+i][0],ProbTextHeight[1]))
+
+				
+		self.DealerProbName[0].SetForegroundColour("#FFFFFF")
+		self.DealerProbName[0].SetBackgroundColour("#000000")
+		self.DealerProbName[1].SetForegroundColour("#000000")
+		self.DealerProbName[1].SetBackgroundColour("#FFFFFF")
+		
+		self.DealerProbName[2].SetBackgroundColour("#90ee90")
+		self.DealerProbName[2].SetForegroundColour("#000000")
+		self.DealerProbName[3].SetBackgroundColour("#7cfc00")
+		self.DealerProbName[3].SetForegroundColour("#000000")
+		self.DealerProbName[4].SetBackgroundColour("#ffa500")
+		self.DealerProbName[4].SetForegroundColour("#000000")
+		self.DealerProbName[5].SetBackgroundColour("#ffb6c1")
+		self.DealerProbName[5].SetForegroundColour("#000000")
+		self.DealerProbName[6].SetBackgroundColour("#ff00ff")
+		self.DealerProbName[6].SetForegroundColour("#000000")
+
+
+		self.DealerProb[0].SetForegroundColour("#000000")
+		self.DealerProb[0].SetBackgroundColour("#FF0000")
+		self.DealerProb[1].SetForegroundColour("#FFFFFF")
+		self.DealerProb[1].SetBackgroundColour("#228B22")
+		
+		self.DealerProb[2].SetBackgroundColour("#90ee90")
+		self.DealerProb[2].SetForegroundColour("#000000")
+		self.DealerProb[3].SetBackgroundColour("#7cfc00")
+		self.DealerProb[3].SetForegroundColour("#000000")
+		self.DealerProb[4].SetBackgroundColour("#ffa500")
+		self.DealerProb[4].SetForegroundColour("#000000")
+		self.DealerProb[5].SetBackgroundColour("#ffb6c1")
+		self.DealerProb[5].SetForegroundColour("#000000")
+		self.DealerProb[6].SetBackgroundColour("#ff00ff")
+		self.DealerProb[6].SetForegroundColour("#000000")
+
+
+
+
+	##=========================
 
 	def InitUI(self):
 		
-		wx.StaticBox(self.leftPanel, label='deal Card', pos=(0,0),size=(500, 230))
-		wx.StaticBox(self.leftPanel, label='Probability', pos=(0,230),size=(500,230))
-		wx.StaticBox(self.leftPanel, label='Remaining Card', pos=(0,460),size=(500,150))
+		wx.StaticBox(self.leftPanel, label='deal Card', pos=(0,0),size=(500, 200))
+		wx.StaticBox(self.leftPanel, label='Probability', pos=(0,200),size=(500,260))
+		wx.StaticBox(self.leftPanel, label='Remaining Card', pos=(0,460),size=(500,120))
 
 		##===deal Card===
 	
@@ -156,9 +259,18 @@ class MainFrame(wx.Frame):
 		#tButton.append(wx.ToggleButton(rightPanel, wx.ID_ANY, '1', size=(20,20), pos=(20,20)))
 		for j in range(4):
 			tmp = []
+			pos = [15,20+23*j]
 			for i in range(13):
 				num = str(i+1)
-				tmp.append(wx.ToggleButton(self.leftPanel, wx.ID_ANY, num, size=(30,20), pos=(40+i*31, 20+23*j)))
+				
+				numButtonWidth=0
+				if i+1 > 9:
+					numButtonWidth = 30
+				else:
+					numButtonWidth = 25
+				pos[0]+=numButtonWidth+1
+
+				tmp.append(wx.ToggleButton(self.leftPanel, wx.ID_ANY, num, size=(numButtonWidth,20), pos=(pos[0], pos[1])))
 			self.tButton.append(tmp)
 
 		#deal Button
@@ -170,6 +282,7 @@ class MainFrame(wx.Frame):
 		
 		delete.Bind(wx.EVT_BUTTON, self.deleteCards)
 		addPlayer.Bind(wx.EVT_BUTTON, self.SetPlayerHand)
+		addDealer.Bind(wx.EVT_BUTTON, self.SetDealerHand)
 		resetHand.Bind(wx.EVT_BUTTON, self.resetHand)
 		resetDeck.Bind(wx.EVT_BUTTON, self.resetDecks)
 		
@@ -191,43 +304,17 @@ class MainFrame(wx.Frame):
 
 		
 		##===Probability===
+		ProbTextHeight=[15,20]
 
 		##Player ProbabilityName
-		PlayerName = wx.StaticText(self.leftPanel, wx.ID_ANY, "#Player Probability", pos=(10,270))
-		self.ProbabilityName[0] = wx.StaticText(self.leftPanel, wx.ID_ANY, 'Burst',style=wx.TE_CENTER, pos=(10,290), size=(200,20))
-		self.ProbabilityName[1] = wx.StaticText(self.leftPanel, wx.ID_ANY, 'Safe',style=wx.TE_CENTER,pos=(210,290), size=(200,20))
-		self.ProbabilityName[2] = wx.StaticText(self.leftPanel, wx.ID_ANY, '~16',style=wx.TE_CENTER,pos=(210,330), size=(130,20))
-		self.ProbabilityName[3] = wx.StaticText(self.leftPanel, wx.ID_ANY, '17~21',style=wx.TE_CENTER,pos=(340,330),size=(70,20))
+		PlayerName = wx.StaticText(self.leftPanel, wx.ID_ANY, "#Player Probability", pos=(10,220))
 		
-		self.ProbabilityName[0].SetForegroundColour("#FFFFFF")
-		self.ProbabilityName[0].SetBackgroundColour("#000000")
-		self.ProbabilityName[1].SetForegroundColour("#000000")
-		self.ProbabilityName[1].SetBackgroundColour("#FFFFFF")
-		
-		self.ProbabilityName[2].SetForegroundColour("#FFFFFF")
-		self.ProbabilityName[2].SetBackgroundColour("#000000")
-		self.ProbabilityName[3].SetForegroundColour("#000000")
-		self.ProbabilityName[3].SetBackgroundColour("#FFFFFF")
+		self.SetProbability()
 
-		##Player Probability Init
-		self.PlayerProbability[0] = wx.StaticText(self.leftPanel, wx.ID_ANY, '0', style=wx.TE_CENTER, pos=(10,310), size=(200,20))
-		self.PlayerProbability[1] = wx.StaticText(self.leftPanel, wx.ID_ANY, '1', style=wx.TE_CENTER, pos=(210, 310), size=(200,20))
-		self.PlayerProbability[2] = wx.StaticText(self.leftPanel, wx.ID_ANY, '2', style=wx.TE_CENTER, pos=(210, 350), size=(130,20))
-		self.PlayerProbability[3] = wx.StaticText(self.leftPanel, wx.ID_ANY, '3', style=wx.TE_CENTER, pos=(340,350), size=(70,20))
 
-		#print '#207# PlayerProbability %s' %(len(self.PlayerProbability))
-		self.PlayerProbability[0].SetForegroundColour("#000000")
-		self.PlayerProbability[0].SetBackgroundColour("#FF0000")
-
-		self.PlayerProbability[1].SetForegroundColour("#FFFFFF")
-		self.PlayerProbability[1].SetBackgroundColour("#228B22")
-
-		self.PlayerProbability[2].SetForegroundColour("#FFFFFF")
-		self.PlayerProbability[2].SetBackgroundColour("#0000CD")
-
-		self.PlayerProbability[3].SetForegroundColour("#000000")
-		self.PlayerProbability[3].SetBackgroundColour("#ff8C00")
-	
+		##Dealer ProbailityName
+		DealaerName = wx.StaticText(self.leftPanel, wx.ID_ANY, "#Dealer Probability", pos=(10, 330))
+		self.SetDealerProbability()
 		
 		
 

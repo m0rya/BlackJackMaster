@@ -45,6 +45,91 @@ class Odds(object):
 				
 
 
+	##====Dealer Prob====
+	def CalcWayNextHand(self, score):
+		#result = [~16, 17, 18, 19, 20, 21,Burst]
+		result=[0,0,0,0,0,0,0]
+		allCards = self.decks.countAllCard()
+		if score > 16:
+			print "#Error OverScore"
+			return 0
+
+		#calc prob 17~21
+		if 6 < score:
+			#calc prob 17~21
+			for i in range(5):
+				border = 17+i-score
+				if border > 10:
+					continue
+				way = self.decks.countSpecificNum(border)
+				result[i+1] = way
+			#calc Burst
+			if score > 11:
+				border = 22-score
+				borderWay = 0
+				for i in range(border, 11):
+					borderWay += self.decks.countSpecificNum(i)
+				result[6] += borderWay	
+	
+			#calc under16
+			if score < 16:
+				border = 16 - score
+				under16Way = 0
+				for i in range(border,0,-1):
+					under16Way += self.decks.countSpecificNum(i)
+				result[0] += under16Way
+					
+			
+		elif score < 7:
+			result = [allCards,0,0,0,0,0,0]
+
+		return result
+		
+
+	def CalcDealerProb(self):
+		score = self.dealer.getScore()
+		score = score[0]
+		if score == 0:
+			return [0,0,0,0,0,0,0]
+
+		#result = [17, 18, 19, 20, 21, Burst]
+		result = [0,0,0,0,0,0]
+		allCards = self.decks.countAllCard()
+
+		for i in range(10):
+			originWay = self.decks.countSpecificNum(i+1)
+
+			#if tmpScore is lager than 17
+			if score+i+1 >= 17:
+				pos = score+i+1 - 17
+				result[pos] += round(float(originWay)/allCards*100, 3)
+
+				continue
+
+
+
+			for j in range(10):
+				tmpWay = self.decks.countSpecificNum(j+1)
+				tmpScore = score+i+1+j+1
+
+				#if tmpScore is lager than 17
+				if tmpScore >= 17:
+					pos = tmpScore - 17
+					if pos > 4:
+						result[5] += round(float(originWay*tmpWay)/(allCards*allCards)*100, 3)
+					else:
+						result[pos] += round(float(originWay*tmpWay)/(allCards*allCards)*100, 3)
+					continue
+
+				eachWay = self.CalcWayNextHand(tmpScore)
+				for k in range(6):
+					tmpResult = float(originWay*tmpWay*eachWay[k+1])/(allCards*allCards*allCards)*100
+					result[k] += round(tmpResult,3)
+					
+		return result
+
+
+	##==================
 	
 	def calcDealerHand(self):
 		scoreTmp =  self.dealer.getScore()
